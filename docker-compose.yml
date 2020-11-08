@@ -1,4 +1,4 @@
-version: '3'
+version: '3.3'
 
 services:
     grafana:
@@ -33,7 +33,26 @@ services:
         networks:
             - backend
             - browsers
+    prometheus:
+        image: prom/prometheus
+        ports:
+            - 9090:9090
+        volumes:
+            - type: bind
+              source: ./prometheus
+              target: /etc/prometheus
+        networks:
+            - prometheus
+            - frontend
+    worker-prometheus:
+        build: ./worker-prometheus
+        ports:
+            - 28000:8000
+        networks:
+            - prometheus
+            - browsers
 networks:
     frontend:
     backend:
     browsers:
+    prometheus:
