@@ -57,10 +57,10 @@ def main():
     metric = parse_yandex_page(soup)
     send_metrics(metric)
 
-    driver.quit()
 
     logging.info('Accessed %s ..', BASE_URL)
     logging.info('Page title: %s', driver.title)
+    driver.quit()
 
 if __name__ == '__main__':
     main()

@@ -20,8 +20,6 @@ services:
         networks:
             - frontend
             - backend
-        volumes:
-            - my_folder:/folder2
     selenium:
         image: selenium/standalone-chrome:3.141.59-oxygen
         ports:
@@ -35,11 +33,7 @@ services:
         networks:
             - backend
             - browsers
-        volumes:
-            - my_folder:/folder
 networks:
     frontend:
     backend:
     browsers:
-volumes:
-    my_folder:
