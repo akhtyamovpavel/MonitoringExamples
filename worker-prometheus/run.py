@@ -6,7 +6,7 @@ import unicodedata
 
 from selenium import webdriver
 from bs4 import BeautifulSoup
-from prometheus_client import start_http_server, Summary, Gauge
+from prometheus_client import start_http_server, Summary, Gauge, Histogram
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -37,9 +37,18 @@ def parse_yandex_page(page):
 
 
 gauges = {
-    'oil': Gauge('oil', 'Oil price at MOEX'),
-    'euro': Gauge('euro', 'Euro price at MOEX'),
-    'usd':  Gauge('usd', 'Usd price at MOEX'),
+    'oil': Histogram(
+        'oil_hist_configured', 'Oil price at MOEX',
+        buckets=list(range(30, 51, 1))
+    ),
+    'euro': Histogram(
+        'euro_hist_configured', 'Euro price at MOEX', 
+        buckets=list(range(80, 101, 1))
+    ),
+    'usd': Histogram(
+        'usd_hist_configured', 'Usd price at MOEX',
+        buckets=list(range(70, 91, 1))
+    ),
 }
 
 class Driver:
@@ -67,7 +76,7 @@ def main():
         metrics = parse_yandex_page(soup)
         for metric_name, metric_value in metrics:
             logging.info(f'{metric_name}: {metric_value}')
-            gauges[metric_name].set(metric_value)
+            gauges[metric_name].observe(metric_value)
         
         time.sleep(30)
 
