@@ -51,6 +51,15 @@ services:
         networks:
             - prometheus
             - browsers
+    influxdb:
+        image: influxdb:1.8
+        ports:
+            - 8086:8086
+        environment:
+            - INFLUXDB_DB=db0
+        networks:
+            - frontend
+            - backend
 networks:
     frontend:
     backend:
