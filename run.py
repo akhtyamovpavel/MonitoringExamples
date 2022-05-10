@@ -1,4 +1,3 @@
-import os
 import logging
 import time
 import unicodedata
@@ -18,28 +17,28 @@ BASE_URL = 'https://yandex.ru/'
 
 CURRENCIES = {
     'USD': 'usd',
+    'USD ЦБ': 'euro',
     'EUR': 'euro',
+    'EUR ЦБ': 'euro',
     'USD MOEX': 'usd',
     'EUR MOEX': 'euro',
     'Нефть': 'oil'
 }
 
 def parse_yandex_page(page):
-    currency_blocks = page.findAll('div', {'class': 'inline-stocks__item'})
+    currency_blocks = page.findAll('a', {'class': 'stocks__item'})
 
     currencies = []
     for block in currency_blocks:
-        currency_utf8 = block.find('a', {'class': 'home-link'}).text
+        currency_utf8 = block.find('div', {'class': 'stocks__item-title'}).text
         currency = unicodedata.normalize("NFKD", currency_utf8)
-        value = float(block.find('span', {
-            'class': 'inline-stocks__value_inner'
-        }).text.replace(',', '.'))
+        value = float(block.find('div', {
+            'class': 'stocks__item-value'
+        }).text.replace(',', '.').replace('₽', '').replace('$', '').strip())
 
         currencies.append((CURRENCIES[currency], value))
     return currencies
 
-
-GRAPHITE_HOST = 'graphite'
 
 def send_metrics(currencies):
     sender = graphyte.Sender(GRAPHITE_HOST, prefix='currencies')
@@ -78,15 +77,14 @@ def main():
     time.sleep(5)
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
+    logging.info('Accessed %s ..', BASE_URL)
+    logging.info('Page title: %s', driver.title)
+    driver.quit()
 
     metric = parse_yandex_page(soup)
     send_metrics(metric)
     send_influx(metric)
 
-
-    logging.info('Accessed %s ..', BASE_URL)
-    logging.info('Page title: %s', driver.title)
-    driver.quit()
 
 if __name__ == '__main__':
     main()
