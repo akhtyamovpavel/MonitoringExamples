@@ -56,7 +56,7 @@ services:
         ports:
             - 8086:8086
         environment:
-            - INFLUXDB_DB=db0
+            - INFLUXDB_DB=pyexample
         networks:
             - frontend
             - backend

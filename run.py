@@ -49,7 +49,6 @@ def send_metrics(currencies):
 def send_influx(currencies):
     print(f"send_influx: {currencies}")
     client = InfluxDBClient(host=INFLUX_HOST, port=8086)
-    client.create_database('pyexample')
     influx_body = []
     metric_time = datetime.now().isoformat()
     for cur_tittle, cur_value in currencies:
