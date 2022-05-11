@@ -17,7 +17,7 @@ BASE_URL = 'https://yandex.ru/'
 
 CURRENCIES = {
     'USD': 'usd',
-    'USD ЦБ': 'euro',
+    'USD ЦБ': 'usd',
     'EUR': 'euro',
     'EUR ЦБ': 'euro',
     'USD MOEX': 'usd',
@@ -51,11 +51,11 @@ def send_influx(currencies):
     client = InfluxDBClient(host=INFLUX_HOST, port=8086)
     influx_body = []
     metric_time = datetime.now().isoformat()
-    for cur_tittle, cur_value in currencies:
+    for cur_title, cur_value in currencies:
         influx_body.append({
             "measurement": "currencies",
             "tags": {
-                "tittle": cur_tittle,
+                "title": cur_title,
             },
             "time": metric_time,
             "fields": {
