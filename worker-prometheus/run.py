@@ -2,7 +2,8 @@ import os
 import logging
 import time
 import unicodedata
-
+import requests
+from xml.etree import ElementTree
 
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -11,71 +12,47 @@ from prometheus_client import start_http_server, Summary, Gauge, Histogram
 
 logging.getLogger().setLevel(logging.INFO)
 
-BASE_URL = 'https://yandex.ru/'
+BASE_URL = 'http://iss.moex.com/iss/engines/stock/markets/shares/securities/{}.xml'
 
-CURRENCIES = {
-    'USD': 'usd',
-    'USD ЦБ': 'euro',
-    'EUR': 'euro',
-    'EUR ЦБ': 'euro',
-    'USD MOEX': 'usd',
-    'EUR MOEX': 'euro',
-    'Нефть': 'oil'
-}
-
-def parse_yandex_page(page):
-    currency_blocks = page.findAll('a', {'class': 'stocks__item'})
-
-    currencies = []
-    for block in currency_blocks:
-        currency_utf8 = block.find('div', {'class': 'stocks__item-title'}).text
-        currency = unicodedata.normalize("NFKD", currency_utf8)
-        value = float(block.find('div', {
-            'class': 'stocks__item-value'
-        }).text.replace(',', '.').replace('₽', '').replace('$', '').strip())
-
-        currencies.append((CURRENCIES[currency], value))
-    return currencies
-
+TICKERS = ['SBERP', 'SBER', 'GAZP']
 
 gauges = {
-    'oil': Histogram(
-        'oil_hist_configured', 'Oil price at MOEX',
-        buckets=list(range(30, 51, 1))
+    'SBERP': Histogram(
+        'sberp_hist_configured', 'SBERP price at MOEX',
+        buckets=list(range(50, 200, 1))
     ),
-    'euro': Histogram(
-        'euro_hist_configured', 'Euro price at MOEX', 
-        buckets=list(range(80, 101, 1))
+    'SBER': Histogram(
+        'sber_hist_configured', 'SBER price at MOEX', 
+        buckets=list(range(50, 200, 1))
     ),
-    'usd': Histogram(
-        'usd_hist_configured', 'Usd price at MOEX',
-        buckets=list(range(70, 91, 1))
+    'GAZP': Histogram(
+        'gazp_hist_configured', 'GAZP price at MOEX',
+        buckets=list(range(100, 250, 1))
     ),
 }
 
-class Driver:
-    def __init__(self):
 
-        self.browser = webdriver.Remote(
-            command_executor='http://selenium:4444/wd/hub',
-            desired_capabilities={'browserName': 'chrome', 'javascriptEnabled': True}
-        )
+def get_metrics():
+    results = []
+    for ticker in TICKERS:
+        response = requests.get(BASE_URL.format(ticker))
+        if response.status_code != 200:
+            continue
+
+        tree = ElementTree.fromstring(response.text)
+        element = tree.findall('./data[@id="marketdata"]/rows/row[@BOARDID="TQBR"]')[0]
+        results.append((ticker, float(element.attrib['LAST'])))
+
+    return results
+
 
 def main():
-    driver = Driver()
 
     start_http_server(8000)
     while True:
-        driver.browser.get('https://yandex.ru')
-        time.sleep(5)
         
-        logging.info('Accessed %s ..', BASE_URL)
-        logging.info('Page title: %s', driver.browser.title)
+        metrics = get_metrics()
 
-        html = driver.browser.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-
-        metrics = parse_yandex_page(soup)
         for metric_name, metric_value in metrics:
             logging.info(f'{metric_name}: {metric_value}')
             gauges[metric_name].observe(metric_value)
