@@ -8,4 +8,6 @@ COPY wait-for-grid.sh /code/wait-for-grid.sh
 COPY run.py /code/run.py
 COPY runner.sh /code/runner.sh
 WORKDIR /code
+RUN sed -i -e 's/\r$//' wait-for-grid.sh
+RUN sed -i -e 's/\r$//' runner.sh
 CMD ["./wait-for-grid.sh", "./runner.sh"]
