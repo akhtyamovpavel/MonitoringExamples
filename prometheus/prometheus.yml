@@ -32,3 +32,8 @@ scrape_configs:
     
     static_configs:
       - targets: ['worker-prometheus:8000']
+
+  - job_name: 'backend'
+    static_configs:
+      - targets:
+          - "backend:8998"

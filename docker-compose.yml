@@ -55,6 +55,14 @@ services:
         networks:
             - frontend
             - backend
+    backend:
+        build:
+            context: backend
+            dockerfile: Dockerfile
+        networks:
+            - prometheus
+        ports:
+            - 8998:8998
 networks:
     frontend:
     backend:
