@@ -1,13 +1,9 @@
-import os
 import logging
 import time
-import unicodedata
 import requests
 from xml.etree import ElementTree
 
-from selenium import webdriver
-from bs4 import BeautifulSoup
-from prometheus_client import start_http_server, Summary, Gauge, Histogram
+from prometheus_client import start_http_server, Histogram
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -16,18 +12,18 @@ BASE_URL = 'http://iss.moex.com/iss/engines/stock/markets/shares/securities/{}.x
 
 TICKERS = ['SBERP', 'SBER', 'GAZP']
 
-gauges = {
+histograms = {
     'SBERP': Histogram(
         'sberp_hist_configured', 'SBERP price at MOEX',
-        buckets=list(range(50, 200, 1))
+        buckets=list(range(290, 330, 5))
     ),
     'SBER': Histogram(
         'sber_hist_configured', 'SBER price at MOEX', 
-        buckets=list(range(50, 200, 1))
+        buckets=list(range(290, 330, 5))
     ),
     'GAZP': Histogram(
         'gazp_hist_configured', 'GAZP price at MOEX',
-        buckets=list(range(100, 250, 1))
+        buckets=list(range(150, 200, 5))
     ),
 }
 
@@ -55,7 +51,7 @@ def main():
 
         for metric_name, metric_value in metrics:
             logging.info(f'{metric_name}: {metric_value}')
-            gauges[metric_name].observe(metric_value)
+            histograms[metric_name].observe(metric_value)
         
         time.sleep(30)
 

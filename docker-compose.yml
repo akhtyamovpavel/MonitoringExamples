@@ -20,15 +20,7 @@ services:
         networks:
             - frontend
             - backend
-    selenium:
-        image: selenium/standalone-chrome:3.141.59-oxygen
-        ports:
-            - 4444:4444
-        volumes:
-            - /dev/shm:/dev/shm
-        networks:
-            - browsers
-    worker:
+    graphite-worker:
         build: .
         networks:
             - backend
@@ -41,6 +33,9 @@ services:
             - type: bind
               source: ./prometheus
               target: /etc/prometheus
+            - type: volume
+              source: prometheus
+              target: /data
         networks:
             - prometheus
             - frontend
@@ -65,3 +60,6 @@ networks:
     backend:
     browsers:
     prometheus:
+
+volumes:
+  prometheus:

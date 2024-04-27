@@ -1,13 +1,9 @@
 import logging
-import time
-import unicodedata
 import graphyte
 
 from datetime import datetime
 
-from selenium import webdriver
 from influxdb import InfluxDBClient
-from bs4 import BeautifulSoup
 import requests
 from xml.etree import ElementTree
 
@@ -24,7 +20,9 @@ TICKERS = ['SBERP', 'SBER', 'GAZP']
 
 
 def send_metrics(currencies):
-    sender = graphyte.Sender(GRAPHITE_HOST, prefix='stocks')
+    sender = graphyte.Sender(
+        GRAPHITE_HOST, prefix='stocks'
+    )
     for currency in currencies:
         sender.send(currency[0], currency[1])
 
@@ -63,20 +61,6 @@ def get_metrics():
 
     
 def main():
-
-        
-    #driver = webdriver.Remote(
-    #    command_executor='http://selenium:4444/wd/hub',
-    #    desired_capabilities={'browserName': 'chrome', 'javascriptEnabled': True}
-    #)
-
-    #driver.get('https://yandex.ru')
-    #time.sleep(5)
-    #html = driver.page_source
-    #soup = BeautifulSoup(html, 'html.parser')
-    #logging.info('Accessed %s ..', BASE_URL)
-    #logging.info('Page title: %s', driver.title)
-    #driver.quit()
 
     metric = get_metrics()
     send_metrics(metric)
