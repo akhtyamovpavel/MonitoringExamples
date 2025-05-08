@@ -9,7 +9,7 @@
    - Доступен на порту 9090
    - Использует node-exporter для сбора системных метрик
    - Имеет собственный worker для сбора пользовательских метрик
-   - **Worker Prometheus (worker-prometheus/run.py)**:
+   - **Worker Prometheus** ([`worker-prometheus/run.py`](worker-prometheus/run.py)):
      - Собирает данные о ценах акций с Московской биржи (MOEX)
      - Отслеживает акции: SBERP, SBER, GAZP
      - Использует гистограммы для агрегации данных
@@ -20,7 +20,7 @@
    - Доступен на порту 18000
    - Включает StatsD для сбора метрик
    - Имеет выделенный worker для обработки данных
-   - **Graphite/InfluxDB Scraper (run.py)**:
+   - **Graphite/InfluxDB Scraper** ([`run.py`](run.py)):
      - Собирает те же данные о ценах акций с MOEX
      - Отправляет метрики в Graphite с префиксом 'stocks'
      - Дублирует данные в InfluxDB с тегами и измерениями
@@ -44,14 +44,16 @@
 
 ## Структура репозитория
 
-- `backend/` - исходный код бэкенд-сервиса
-- `prometheus/` - конфигурация Prometheus
-- `worker-prometheus/` - код worker'а для Prometheus
-- `Dockerfile` - базовый Dockerfile для сборки образов
-- `docker-compose.yml` - конфигурация всех сервисов
-- `install-node-exporter.sh` - скрипт установки node-exporter
-- `run.py` - основной скрипт запуска
-- `runner.sh` - вспомогательный скрипт запуска
+- [`backend/`](backend/) - исходный код бэкенд-сервиса
+- [`prometheus/`](prometheus/) - конфигурация Prometheus
+- [`worker-prometheus/`](worker-prometheus/) - код worker'а для Prometheus
+  - [`run.py`](worker-prometheus/run.py) - скрипт сбора метрик для Prometheus
+- [`Dockerfile`](Dockerfile) - базовый Dockerfile для сборки образов
+- [`docker-compose.yml`](docker-compose.yml) - конфигурация всех сервисов
+- [`install-node-exporter.sh`](install-node-exporter.sh) - скрипт установки node-exporter
+- [`run.py`](run.py) - скрипт сбора метрик для Graphite и InfluxDB
+- [`runner.sh`](runner.sh) - вспомогательный скрипт запуска
+- [`wait-for-grid.sh`](wait-for-grid.sh) - скрипт ожидания готовности сетки
 
 ## Запуск проекта
 
